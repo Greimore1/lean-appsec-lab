@@ -1,0 +1,40 @@
+name: CI (SAST + Regression)
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build-sast-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install
+      - name: SAST (npm audit + Semgrep)
+        run: |
+          mkdir -p reports
+          npm audit --json > reports/npm-audit.json || true
+          npx semgrep --config .semgrep.yml --json --output reports/semgrep.json || true
+      - name: Start safe app
+        run: |
+          nohup node src/app.js > server.log 2>&1 &
+          sleep 2
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+      - name: Regression PoC (should fail against safe app)
+        working-directory: poctools
+        run: |
+          go run sqli_poc.go -target http://localhost:3000 || exit 0
+          echo "PoC succeeded unexpectedly; regression failed" && exit 1
+      - name: Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: reports
+          path: reports
