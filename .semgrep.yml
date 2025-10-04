@@ -1,0 +1,13 @@
+rules:
+  - id: js-sql-concat
+    languages: [javascript]
+    message: Potential SQL injection via string concatenation
+    severity: ERROR
+    patterns:
+      - pattern: |
+          $DB.get("..." + $VAR, ...)
+  - id: jwt-weak-secret
+    languages: [javascript]
+    message: Weak or hardcoded JWT secret
+    severity: WARNING
+    pattern: jwt.sign(..., "secret" , ...)
