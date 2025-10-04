@@ -1,0 +1,16 @@
+{
+  "name": "lean-appsec-lab",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node src/app.js",
+    "sast:semgrep": "npx semgrep --config .semgrep.yml --json --output reports/semgrep.json || true",
+    "audit": "npm audit --json > reports/npm-audit.json || true"
+  },
+  "dependencies": {
+    "body-parser": "^1.20.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "sqlite3": "^5.1.7"
+  }
+}
